@@ -371,20 +371,20 @@ initializeProxySystem();`;
         // 1. 打开新网页
         window.open('https://aistudio.google.com/app/apps/bundled/blank?showPreview=true&showCode=true', '_blank');
 
-        // 2. 弹出包含最终指令的窗口
-        // 硬编码绝对路径，因为我们从环境中知道它
-        const folderPath = 'e:\\xiangmu\\SillyTavern-ReverseProxy\\SillyTavern-1.12.13\\public\\extensions\\third-party\\SillyTavern-ReverseProxy\\fangdai';
+        // 2. 准备一个相对于SillyTavern根目录的、用户易于理解的相对路径
+        const folderPath = 'public\\extensions\\third-party\\SillyTavern-ReverseProxy\\fangdai';
         
+        // 3. 创建并显示包含完整分步指南的弹窗
         const popupHtml = `
             <div id="final-instructions-popup" style="padding: 20px; text-align: left; max-width: 600px; margin: auto;">
                 <h3 style="text-align:center; color: #d9534f;">请按以下两步操作</h3>
                 <hr>
 
                 <h4>第一步：启动后台服务</h4>
-                <p>请复制以下完整路径，粘贴到您的“文件资源管理器”的地址栏中，按回车键，然后在打开的文件夹中双击运行 <strong>打开反代服务.bat</strong> 文件。</p>
+                <p>请在您的 <strong>SillyTavern 根目录</strong>下，根据以下相对路径找到文件夹，然后在其中双击运行 <strong>打开反代服务.bat</strong> 文件。</p>
                 <div style="display:flex; margin-top:10px;">
                     <input id="folder-path-to-copy" type="text" style="width: 80%; font-family: monospace; padding: 5px;" value="${folderPath}" readonly>
-                    <div id="copy-path-button" class="menu_button menu_button_primary" style="margin-left:5px;">复制路径</div>
+                    <div id="copy-path-button" class="menu_button menu_button_primary" style="margin-left:5px;">复制相对路径</div>
                 </div>
                 
                 <hr style="margin-top:25px;">
@@ -403,7 +403,7 @@ initializeProxySystem();`;
             pathInput.select();
             document.execCommand('copy');
             $(this).text('已复制!');
-            setTimeout(() => $(this).text('复制路径'), 2000);
+            setTimeout(() => $(this).text('复制相对路径'), 2000);
         });
 
         // 绑定复制脚本按钮事件
