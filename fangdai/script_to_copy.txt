@@ -1,11 +1,4 @@
-// 从酒馆的核心脚本中导入弹窗API
-import { callGenericPopup } from '../../../../../scripts/popup.js';
-
-// 等待DOM加载完毕
-$(document).ready(function () {
-    
-    // 将脚本内容直接硬编码为字符串
-    const scriptContent = `const Logger = {
+const Logger = {
   enabled: true,
   
   output(...messages) {
@@ -13,7 +6,7 @@ $(document).ready(function () {
     
     const timestamp = this._getTimestamp();
     const logElement = document.createElement('div');
-    logElement.textContent = \`[\${timestamp}] \${messages.join(' ')}\`;
+    logElement.textContent = `[${timestamp}] ${messages.join(' ')}`;
     document.body.appendChild(logElement);
   },
   
@@ -21,7 +14,7 @@ $(document).ready(function () {
     const now = new Date();
     const time = now.toLocaleTimeString('zh-CN', { hour12: false });
     const ms = now.getMilliseconds().toString().padStart(3, '0');
-    return \`\${time}.\${ms}\`;
+    return `${time}.${ms}`;
   }
 };
 
@@ -92,7 +85,7 @@ class ConnectionManager extends EventTarget {
     
     this.reconnectAttempts++;
     setTimeout(() => {
-      Logger.output(\`[ConnectionManager] 重连尝试 \${this.reconnectAttempts}\`);
+      Logger.output(`[ConnectionManager] 重连尝试 ${this.reconnectAttempts}`);
       this.establish().catch(() => {});
     }, this.reconnectDelay);
   }
@@ -118,7 +111,7 @@ class RequestProcessor {
       
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(\`HTTP \${response.status}: \${response.statusText}. Body: \${errorBody}\`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}. Body: ${errorBody}`);
       }
       
       return response;
@@ -154,7 +147,7 @@ class RequestProcessor {
     const queryParams = new URLSearchParams(requestSpec.query_params);
     const queryString = queryParams.toString();
     
-    return \`https://\${this.targetDomain}/\${pathSegment}\${queryString ? '?' + queryString : ''}\`;
+    return `https://${this.targetDomain}/${pathSegment}${queryString ? '?' + queryString : ''}`;
   }
   
   _generateRandomString(length) {
@@ -182,7 +175,7 @@ class RequestProcessor {
             const lastPart = lastContent.parts[lastContent.parts.length - 1];
             if (lastPart.text && typeof lastPart.text === 'string') {
               const decoyString = this._generateRandomString(5);
-              lastPart.text += \`\\n\\n[sig:\${decoyString}]\`; 
+              lastPart.text += `\n\n[sig:${decoyString}]`; 
               Logger.output('[RequestProcessor] 已成功向提示文本末尾添加伪装字符串。');
             }
           }
@@ -248,7 +241,7 @@ class ProxySystem extends EventTarget {
     try {
       requestSpec = JSON.parse(messageData);
       Logger.output('[ProxySystem] 收到请求:', requestSpec.method, requestSpec.path);
-      Logger.output(\`[ProxySystem] 服务器模式为: \${requestSpec.streaming_mode || 'fake'}\`);
+      Logger.output(`[ProxySystem] 服务器模式为: ${requestSpec.streaming_mode || 'fake'}`);
       
       await this._processProxyRequest(requestSpec);
     } catch (error) {
@@ -345,7 +338,7 @@ class ProxySystem extends EventTarget {
       request_id: operationId,
       event_type: 'error',
       status: 500,
-      message: \`代理系统错误: \${error.message || '未知错误'}\`
+      message: `代理系统错误: ${error.message || '未知错误'}`
     };
     
     this.connectionManager.transmit(errorMessage);
@@ -364,71 +357,4 @@ async function initializeProxySystem() {
   }
 }
 
-initializeProxySystem();`;
-
-    // 封装所有操作的函数
-    function performActions() {
-        // 1. 打开新网页
-        window.open('https://aistudio.google.com/app/apps/bundled/blank?showPreview=true&showCode=true', '_blank');
-
-        // 2. 弹出包含最终指令的窗口
-        // 硬编码绝对路径，因为我们从环境中知道它
-        const folderPath = 'e:\\xiangmu\\SillyTavern-ReverseProxy\\SillyTavern-1.12.13\\public\\extensions\\third-party\\SillyTavern-ReverseProxy\\fangdai';
-        
-        const popupHtml = `
-            <div id="final-instructions-popup" style="padding: 20px; text-align: left; max-width: 600px; margin: auto;">
-                <h3 style="text-align:center; color: #d9534f;">请按以下两步操作</h3>
-                <hr>
-
-                <h4>第一步：启动后台服务</h4>
-                <p>请复制以下完整路径，粘贴到您的“文件资源管理器”的地址栏中，按回车键，然后在打开的文件夹中双击运行 <strong>打开反代服务.bat</strong> 文件。</p>
-                <div style="display:flex; margin-top:10px;">
-                    <input id="folder-path-to-copy" type="text" style="width: 80%; font-family: monospace; padding: 5px;" value="${folderPath}" readonly>
-                    <div id="copy-path-button" class="menu_button menu_button_primary" style="margin-left:5px;">复制路径</div>
-                </div>
-                
-                <hr style="margin-top:25px;">
-
-                <h4>第二步：复制前端脚本</h4>
-                <p>请将以下代码完整复制，并粘贴到已打开的Google AI Studio网页的左侧代码框中。</p>
-                <textarea id="script-to-copy" style="width: 98%; height: 150px; margin: 10px auto; font-family: monospace; white-space: pre; overflow-wrap: normal; overflow-x: scroll;" readonly>${scriptContent}</textarea>
-                <div id="copy-script-button" class="menu_button menu_button_primary" style="display:block; text-align:center; margin:10px auto;">复制脚本</div>
-            </div>
-        `;
-        callGenericPopup(popupHtml, 'html');
-
-        // 绑定复制路径按钮事件
-        $('#copy-path-button').on('click', function() {
-            const pathInput = $('#folder-path-to-copy');
-            pathInput.select();
-            document.execCommand('copy');
-            $(this).text('已复制!');
-            setTimeout(() => $(this).text('复制路径'), 2000);
-        });
-
-        // 绑定复制脚本按钮事件
-        $('#copy-script-button').on('click', function() {
-            const textarea = $('#script-to-copy');
-            textarea.select();
-            document.execCommand('copy');
-            $(this).text('已复制!');
-            setTimeout(() => $(this).text('复制脚本'), 2000);
-        });
-    }
-
-    // **【UI注入】**
-    const mainButtonHTML = `
-        <div id="one-click-proxy-button" class="menu_button" style="background-color: #3498db; color: white; margin-left: 10px; padding: 5px 10px; border-radius: 5px; font-weight: bold; cursor: pointer;">
-            一键反代
-        </div>
-    `;
-
-    const topBar = $('#top-bar');
-    if (topBar.length > 0) {
-        const mainButton = $(mainButtonHTML);
-        mainButton.on('click', performActions);
-        topBar.append(mainButton);
-    } else {
-        console.error("反代插件: 致命错误，无法找到 #top-bar 元素!");
-    }
-});
+initializeProxySystem();
