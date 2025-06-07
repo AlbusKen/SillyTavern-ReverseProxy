@@ -1,0 +1,12 @@
+{
+    "name": "SillyTavern-ReverseProxy",
+    "display_name": "反代控制器",
+    "version": "1.0.0",
+    "author": "Cline",
+    "description": "提供一个UI开关来启动和停止后台Node.js反向代理服务。",
+    "js": "index.js",
+    "css": "assets/style.css",
+    "requires": [],
+    "optional": [],
+    "loading_order": 999
+}
